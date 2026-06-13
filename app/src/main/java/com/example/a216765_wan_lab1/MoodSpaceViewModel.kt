@@ -9,10 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class SimpleActivity(
-    val title: String,
-    val time: String
-)
+data class SimpleActivity(val title: String, val time: String)
 
 data class MentalHealthResult(
     val status: String,
@@ -35,24 +32,66 @@ data class MoodSpaceUiState(
     val readMessages: Set<Int> = emptySet(),
     val showAllGoalsPopup: Boolean = false,
     val showMentalHealthPopup: Boolean = false,
+    val showShakePopup: Boolean = false,
     val activities: List<SimpleActivity> = emptyList(),
     val mentalHealthHistory: List<MentalHealthResult> = emptyList(),
     val latestMentalHealthResult: MentalHealthResult? = null,
-    val savedActivities: List<ActivityEntity> = emptyList()
+    val savedActivities: List<ActivityEntity> = emptyList(),
+    val dailyQuote: String = "Loading your daily quote...",
+    val dailyQuoteAuthor: String = "",
+    val isQuoteLoading: Boolean = true,
+    val quoteError: Boolean = false,
+    val firebaseSynced: Boolean = false
 )
 
-class MoodSpaceViewModel(private val repository: ActivityRepository) : ViewModel() {
+class MoodSpaceViewModel(
+    private val repository: ActivityRepository,
+    private val firestoreRepository: FirestoreRepository = FirestoreRepository()
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MoodSpaceUiState())
     val uiState: StateFlow<MoodSpaceUiState> = _uiState.asStateFlow()
 
     init {
-        // Load all saved activities from Room when ViewModel starts
         viewModelScope.launch {
             repository.allActivities.collect { entities ->
                 _uiState.update { it.copy(savedActivities = entities) }
             }
         }
+        fetchDailyQuote()
+    }
+
+    fun fetchDailyQuote() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isQuoteLoading = true, quoteError = false) }
+            try {
+                val response = QuoteApi.service.getRandomQuote()
+                _uiState.update {
+                    it.copy(
+                        dailyQuote = "\"${response.content}\"",
+                        dailyQuoteAuthor = "— ${response.author}",
+                        isQuoteLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        dailyQuote = "\"Take care of your mind as you would your body. You deserve peace.\"",
+                        dailyQuoteAuthor = "— MoodSpace",
+                        isQuoteLoading = false,
+                        quoteError = true
+                    )
+                }
+            }
+        }
+    }
+
+    fun onShakeDetected() {
+        _uiState.update { it.copy(showShakePopup = true) }
+    }
+
+    fun dismissShakePopup() {
+        _uiState.update { it.copy(showShakePopup = false) }
     }
 
     fun setDisplayedName(name: String) {
@@ -61,52 +100,26 @@ class MoodSpaceViewModel(private val repository: ActivityRepository) : ViewModel
 
     fun setMoodDone(mood: String) {
         _uiState.update { it.copy(moodDone = true, selectedMood = mood) }
-        // Save mood to Room
         viewModelScope.launch {
-            repository.insert(
-                ActivityEntity(
-                    title = "Mood: $mood",
-                    time = getCurrentTime(),
-                    type = "mood"
-                )
-            )
+            repository.insert(ActivityEntity(title = "Mood: $mood", time = getCurrentTime(), type = "mood"))
         }
         checkAllGoalsDone()
     }
 
     fun setGratitudeDone() {
         _uiState.update { it.copy(gratitudeDone = true) }
-        // Save gratitude to Room
         viewModelScope.launch {
-            repository.insert(
-                ActivityEntity(
-                    title = "Gratitude",
-                    time = getCurrentTime(),
-                    type = "gratitude"
-                )
-            )
+            repository.insert(ActivityEntity(title = "Gratitude", time = getCurrentTime(), type = "gratitude"))
         }
         checkAllGoalsDone()
     }
 
     fun setSleepDone(inBed: String, outOfBed: String, duration: String) {
         _uiState.update {
-            it.copy(
-                sleepDone = true,
-                inBedTime = inBed,
-                outOfBedTime = outOfBed,
-                sleepDuration = duration
-            )
+            it.copy(sleepDone = true, inBedTime = inBed, outOfBedTime = outOfBed, sleepDuration = duration)
         }
-        // Save sleep to Room
         viewModelScope.launch {
-            repository.insert(
-                ActivityEntity(
-                    title = "Sleep: $duration ($inBed - $outOfBed)",
-                    time = getCurrentTime(),
-                    type = "sleep"
-                )
-            )
+            repository.insert(ActivityEntity(title = "Sleep: $duration ($inBed - $outOfBed)", time = getCurrentTime(), type = "sleep"))
         }
         checkAllGoalsDone()
     }
@@ -129,15 +142,19 @@ class MoodSpaceViewModel(private val repository: ActivityRepository) : ViewModel
                 mentalHealthHistory = it.mentalHealthHistory + result
             )
         }
-        // Save mental health result to Room
         viewModelScope.launch {
-            repository.insert(
-                ActivityEntity(
-                    title = "${result.emoji} ${result.status}",
-                    time = result.time,
-                    type = "mental_health"
+            repository.insert(ActivityEntity(title = "${result.emoji} ${result.status}", time = result.time, type = "mental_health"))
+            // Save to Firebase
+            val s = _uiState.value
+            val synced = firestoreRepository.saveMoodEntry(
+                FirestoreMoodEntry(
+                    mood = s.selectedMood,
+                    mentalHealthStatus = result.status,
+                    date = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault()).format(java.util.Date()),
+                    time = result.time
                 )
             )
+            _uiState.update { it.copy(firebaseSynced = synced) }
         }
     }
 
@@ -146,18 +163,9 @@ class MoodSpaceViewModel(private val repository: ActivityRepository) : ViewModel
     }
 
     fun addActivity(title: String, time: String) {
-        _uiState.update {
-            it.copy(activities = it.activities + SimpleActivity(title, time))
-        }
-        // Save simple activity to Room
+        _uiState.update { it.copy(activities = it.activities + SimpleActivity(title, time)) }
         viewModelScope.launch {
-            repository.insert(
-                ActivityEntity(
-                    title = title,
-                    time = time,
-                    type = "simple"
-                )
-            )
+            repository.insert(ActivityEntity(title = title, time = time, type = "simple"))
         }
     }
 
@@ -170,75 +178,38 @@ class MoodSpaceViewModel(private val repository: ActivityRepository) : ViewModel
 
     private fun calculateMentalHealth(): MentalHealthResult {
         val s = _uiState.value
-        val mood = s.selectedMood
-        val sleepHours = parseSleepHours(s.sleepDuration)
-        val time = getCurrentTime()
-
-        val moodScore = when (mood) {
-            "Great" -> 3
-            "Good"  -> 2
-            "OK"    -> 1
-            else    -> 0
-        }
-
+        val moodScore = when (s.selectedMood) { "Great" -> 3; "Good" -> 2; "OK" -> 1; else -> 0 }
         val sleepScore = when {
-            sleepHours >= 8 -> 3
-            sleepHours >= 7 -> 2
-            sleepHours >= 6 -> 1
-            else            -> 0
+            parseSleepHours(s.sleepDuration) >= 8 -> 3
+            parseSleepHours(s.sleepDuration) >= 7 -> 2
+            parseSleepHours(s.sleepDuration) >= 6 -> 1
+            else -> 0
         }
-
-        val gratitudeBonus = 1
-        val totalScore = moodScore + sleepScore + gratitudeBonus
-
+        val total = moodScore + sleepScore + 1
+        val time = getCurrentTime()
         return when {
-            totalScore >= 6 -> MentalHealthResult(
-                status  = "You're Doing Great! 🌟",
-                emoji   = "😊",
-                message = "Based on your mood, sleep, and gratitude today, you appear to be in a positive mental state. Keep up the great work!",
-                advice  = "Continue your healthy habits. Regular check-ins like this help maintain good mental well-being.",
-                color   = "green",
-                time    = time
-            )
-            totalScore >= 4 -> MentalHealthResult(
-                status  = "You're Doing Okay 🌤",
-                emoji   = "🙂",
-                message = "Your mental well-being seems generally stable today, but there are small signs of stress or low energy. That's completely normal.",
-                advice  = "Try to get a little more sleep tonight and take a moment to appreciate the small things. You're doing better than you think.",
-                color   = "yellow",
-                time    = time
-            )
-            totalScore >= 2 -> MentalHealthResult(
-                status  = "Low Mood Detected 🌧",
-                emoji   = "😔",
-                message = "Based on today's check-in, your mood and sleep suggest you may be experiencing some emotional difficulty. This is common and you are not alone.",
-                advice  = "Consider talking to someone you trust. Small steps like a short walk, drinking water, or calling a friend can make a difference. If this persists, consider speaking to a counsellor.",
-                color   = "orange",
-                time    = time
-            )
-            else -> MentalHealthResult(
-                status  = "Signs of Distress 💙",
-                emoji   = "😢",
-                message = "Your responses today suggest you may be going through a difficult time. Please know that what you're feeling is valid, and help is available.",
-                advice  = "You don't have to face this alone. Please reach out to someone you trust, or contact a mental health helpline. Speaking to a counsellor or therapist can make a real difference — you deserve support.",
-                color   = "red",
-                time    = time
-            )
+            total >= 6 -> MentalHealthResult("You're Doing Great! 🌟", "😊",
+                "Based on your mood, sleep, and gratitude today, you appear to be in a positive mental state. Keep up the great work!",
+                "Continue your healthy habits. Regular check-ins like this help maintain good mental well-being.", "green", time)
+            total >= 4 -> MentalHealthResult("You're Doing Okay 🌤", "🙂",
+                "Your mental well-being seems generally stable today, but there are small signs of stress or low energy. That's completely normal.",
+                "Try to get a little more sleep tonight and take a moment to appreciate the small things. You're doing better than you think.", "yellow", time)
+            total >= 2 -> MentalHealthResult("Low Mood Detected 🌧", "😔",
+                "Based on today's check-in, your mood and sleep suggest you may be experiencing some emotional difficulty. This is common and you are not alone.",
+                "Consider talking to someone you trust. Small steps like a short walk, drinking water, or calling a friend can make a difference.", "orange", time)
+            else -> MentalHealthResult("Signs of Distress 💙", "😢",
+                "Your responses today suggest you may be going through a difficult time. Please know that what you're feeling is valid, and help is available.",
+                "You don't have to face this alone. Please reach out to someone you trust, or contact a mental health helpline. Speaking to a counsellor or therapist can make a real difference.", "red", time)
         }
     }
 
-    private fun parseSleepHours(sleepDuration: String): Int {
-        return try {
-            sleepDuration.trim().split(" ")[0].toInt()
-        } catch (e: Exception) { 7 }
-    }
+    private fun parseSleepHours(s: String) = try { s.trim().split(" ")[0].toInt() } catch (e: Exception) { 7 }
 
     private fun getCurrentTime(): String {
         val sdf = java.text.SimpleDateFormat("h:mm a", java.util.Locale.getDefault())
         return sdf.format(java.util.Date())
     }
 
-    // Factory to create ViewModel with Repository
     companion object {
         fun factory(repository: ActivityRepository): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {

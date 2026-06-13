@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,6 +58,8 @@ sealed class Screen(val route: String) {
     object Insights : Screen("insights")
     object Sleep : Screen("sleep")
     object SimpleActivity : Screen("simple_activity")
+
+    object Quote : Screen("quote")
     object InboxDetail : Screen("inbox_detail/{messageIndex}") {
         fun createRoute(index: Int) = "inbox_detail/$index"
     }
@@ -85,13 +88,44 @@ val ActivityOrangeBg = Color(0xFFFFF3E0)
 
 // ── MAIN ACTIVITY ──
 class MainActivity : ComponentActivity() {
+
+    private var shakeDetector: ShakeDetector? = null
+    private var shakeCallback: (() -> Unit)? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                MoodSpaceNavigation()
+                MoodSpaceNavigation(
+                    onRegisterShake = { callback ->
+                        shakeCallback = callback
+                        shakeDetector = ShakeDetector(this@MainActivity, callback)
+                        shakeDetector?.start()
+                    }
+                )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        shakeCallback?.let { cb ->
+            if (shakeDetector == null) {
+                shakeDetector = ShakeDetector(this, cb)
+            }
+            shakeDetector?.start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        shakeDetector?.stop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        shakeDetector?.stop()
+        shakeDetector = null
     }
 }
 
@@ -117,7 +151,9 @@ fun getCurrentTime(): String {
 
 // ── NAVIGATION HOST ──
 @Composable
-fun MoodSpaceNavigation() {
+fun MoodSpaceNavigation(
+    onRegisterShake: ((callback: () -> Unit) -> Unit)? = null
+) {
     val navController = rememberNavController()
     val context = androidx.compose.ui.platform.LocalContext.current
     val application = context.applicationContext as MoodSpaceApplication
@@ -125,7 +161,16 @@ fun MoodSpaceNavigation() {
         factory = MoodSpaceViewModel.factory(application.repository)
     )
 
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
+    LaunchedEffect(Unit) {
+        onRegisterShake?.invoke {
+            viewModel.onShakeDetected()
+        }
+    }
+
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home.route
+    ) {
         composable(Screen.Home.route) {
             MoodSpaceApp(navController = navController, viewModel = viewModel)
         }
@@ -144,9 +189,17 @@ fun MoodSpaceNavigation() {
         composable(Screen.SimpleActivity.route) {
             SimpleActivityScreen(navController = navController, viewModel = viewModel)
         }
+        composable(Screen.Quote.route) {
+            QuoteScreen(navController = navController, viewModel = viewModel)
+        }
         composable("inbox_detail/{messageIndex}") { backStackEntry ->
-            val index = backStackEntry.arguments?.getString("messageIndex")?.toIntOrNull() ?: 0
-            InboxDetailScreen(navController = navController, viewModel = viewModel, messageIndex = index)
+            val index = backStackEntry.arguments
+                ?.getString("messageIndex")?.toIntOrNull() ?: 0
+            InboxDetailScreen(
+                navController = navController,
+                viewModel = viewModel,
+                messageIndex = index
+            )
         }
     }
 }
@@ -225,6 +278,97 @@ fun ActivityCard(
             Text("›", fontSize = 20.sp, color = SageMuted)
         }
         HorizontalDivider(color = MintBorder, thickness = 0.5.dp)
+    }
+}
+
+// ── QUOTE SCREEN (API Feature) ──
+@Composable
+fun QuoteScreen(navController: NavController, viewModel: MoodSpaceViewModel) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    Box(modifier = Modifier.fillMaxSize().background(MintLight)) {
+        Column(modifier = Modifier.fillMaxSize()) {
+
+            Row(modifier = Modifier.fillMaxWidth().background(White)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = { navController.popBackStack() }) {
+                    Text("‹", fontSize = 24.sp, color = Black, fontWeight = FontWeight.Bold) }
+                Text("Daily Quote", fontSize = 17.sp, fontWeight = FontWeight.Bold, color = Black)
+                TextButton(onClick = { viewModel.fetchDailyQuote() }) {
+                    Text("↺", fontSize = 20.sp, color = MintGreen) }
+            }
+            HorizontalDivider(color = MintBorder, thickness = 0.5.dp)
+
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())
+                .padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+
+                Spacer(modifier = Modifier.height(40.dp))
+
+                Text("🌿", fontSize = 48.sp)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text("Today's Inspiration", fontSize = 14.sp,
+                    color = SageMuted, letterSpacing = 1.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Card(modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = White),
+                    border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)) {
+                    Column(modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (uiState.isQuoteLoading) {
+                            CircularProgressIndicator(color = MintGreen)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text("Fetching your quote...", fontSize = 13.sp, color = SageMuted)
+                        } else {
+                            Text(uiState.dailyQuote, fontSize = 16.sp, color = SageDark,
+                                lineHeight = 26.sp, textAlign = TextAlign.Center,
+                                fontWeight = FontWeight.Medium)
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(uiState.dailyQuoteAuthor, fontSize = 13.sp,
+                                color = MintGreen, fontWeight = FontWeight.Bold)
+                        }
+                        if (uiState.quoteError) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("(Offline — showing saved quote)",
+                                fontSize = 11.sp, color = SageMuted)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Button(onClick = { viewModel.fetchDailyQuote() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MintGreen)) {
+                    Text("Get New Quote ↺", fontSize = 14.sp, color = White)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Card(modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MintSurface)) {
+                    Row(modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Text("🌐", fontSize = 18.sp)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text("Live from Quotable API", fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold, color = SageDark)
+                            Text("Quotes are fetched live from the internet and updated each time you refresh.",
+                                fontSize = 11.sp, color = SageMuted, lineHeight = 16.sp)
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(40.dp))
+            }
+        }
     }
 }
 
@@ -510,6 +654,46 @@ fun MoodSpaceApp(navController: NavController, viewModel: MoodSpaceViewModel) {
         }
     }
 
+    // ── SHAKE POPUP ──
+    if (uiState.showShakePopup) {
+        Dialog(onDismissRequest = { viewModel.dismissShakePopup() }) {
+            Card(shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = White),
+                modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("🫁", fontSize = 48.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Breathing Exercise", fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold, color = SageDark)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("You shook your device! Take a moment to breathe.",
+                        fontSize = 13.sp, color = SageMuted, textAlign = TextAlign.Center)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MintSurface)) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Try this:", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = SageDark)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("🌬️  Breathe IN for 4 seconds", fontSize = 13.sp, color = SageDark)
+                            Text("⏸️  Hold for 4 seconds", fontSize = 13.sp, color = SageDark)
+                            Text("😮‍💨  Breathe OUT for 6 seconds", fontSize = 13.sp, color = SageDark)
+                            Text("🔄  Repeat 3 times", fontSize = 13.sp, color = SageDark)
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = { viewModel.dismissShakePopup() },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = MintGreen)) {
+                        Text("I feel better 💚", fontSize = 14.sp, color = White)
+                    }
+                }
+            }
+        }
+    }
+
     // Plus menu popup
     if (showPlusMenu) {
         Dialog(onDismissRequest = { showPlusMenu = false }) {
@@ -722,6 +906,35 @@ fun MoodSpaceApp(navController: NavController, viewModel: MoodSpaceViewModel) {
                     }
                 }
             }
+
+            // Daily Quote Card on Home
+            Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp)
+                .clickable { navController.navigate(Screen.Quote.route) },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = White),
+                border = CardDefaults.outlinedCardBorder().copy(width = 0.5.dp)) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("🌿", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Daily Quote", fontSize = 13.sp,
+                            fontWeight = FontWeight.Bold, color = SageDark)
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text("tap for more ›", fontSize = 11.sp, color = SageMuted)
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    if (uiState.isQuoteLoading) {
+                        Text("Loading...", fontSize = 12.sp, color = SageMuted)
+                    } else {
+                        Text(uiState.dailyQuote.take(100) + if (uiState.dailyQuote.length > 100) "..." else "",
+                            fontSize = 12.sp, color = SageMid, lineHeight = 18.sp)
+                        Text(uiState.dailyQuoteAuthor, fontSize = 11.sp,
+                            color = MintGreen, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Spacer(modifier = Modifier.height(16.dp))
             Text("A216765", fontSize = 11.sp, color = SageMuted,
