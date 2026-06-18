@@ -68,7 +68,7 @@ class MoodSpaceViewModel(
                 val response = QuoteApi.service.getRandomQuote()
                 _uiState.update {
                     it.copy(
-                        dailyQuote = "\"${response.content}\"",
+                        dailyQuote = "\"${response.quote}\"",
                         dailyQuoteAuthor = "— ${response.author}",
                         isQuoteLoading = false
                     )

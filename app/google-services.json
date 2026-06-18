@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "662947124490",
+    "project_id": "moodspace-5c485",
+    "storage_bucket": "moodspace-5c485.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662947124490:android:a1c10df33b084feedbd6f3",
+        "android_client_info": {
+          "package_name": "com.example.A216765_Wan_Lab1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgXLZKHIuVPfG9ojXyfRQmY9ajt9217JA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:662947124490:android:92b61196b7b08fbadbd6f3",
+        "android_client_info": {
+          "package_name": "com.example.a216765_wan_lab1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgXLZKHIuVPfG9ojXyfRQmY9ajt9217JA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
