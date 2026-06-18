@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nur Adlyna Batrisyia | Mobile Programming e-Portfolio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --mint: #3a9e6a;
+      --mint-light: #f8fdf9;
+      --mint-surface: #e8f5ee;
+      --mint-border: #c8e6d4;
+      --sage-dark: #2d6b4a;
+      --sage-mid: #4a7a60;
+      --sage-muted: #7aaa90;
+      --white: #ffffff;
+      --black: #1a1c1a;
+      --grey: #f5f5f5;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--mint-light);
+      color: var(--black);
+      line-height: 1.6;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--white);
+      border-bottom: 1px solid var(--mint-border);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      box-shadow: 0 2px 12px rgba(58,158,106,0.08);
+    }
+
+    .nav-brand {
+      font-weight: 700;
+      color: var(--mint);
+      font-size: 1.1rem;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 6px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--sage-mid);
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover {
+      background: var(--mint-surface);
+      color: var(--mint);
+    }
+
+    /* ── HERO ── */
+    #home {
+      background: linear-gradient(135deg, var(--mint) 0%, var(--sage-dark) 100%);
+      color: white;
+      padding: 80px 24px;
+      text-align: center;
+    }
+
+    .hero-emoji { font-size: 4rem; margin-bottom: 16px; }
+
+    #home h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    #home .subtitle {
+      font-size: 1rem;
+      opacity: 0.85;
+      margin-bottom: 24px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .sdg-card {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 12px;
+      padding: 16px 28px;
+      margin-top: 8px;
+    }
+
+    .sdg-card p { font-size: 0.9rem; opacity: 0.9; margin-top: 4px; }
+
+    /* ── SECTIONS ── */
+    section { padding: 64px 24px; max-width: 960px; margin: 0 auto; }
+
+    h2.section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--sage-dark);
+      margin-bottom: 8px;
+    }
+
+    .section-line {
+      width: 48px;
+      height: 3px;
+      background: var(--mint);
+      border-radius: 2px;
+      margin-bottom: 32px;
+    }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--mint-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(58,158,106,0.06);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      background: var(--mint-surface);
+      flex-shrink: 0;
+    }
+
+    .card-title { font-size: 1.05rem; font-weight: 700; color: var(--sage-dark); }
+    .card-sub   { font-size: 0.8rem;  color: var(--sage-muted); margin-top: 2px; }
+
+    .card p {
+      font-size: 0.88rem;
+      color: var(--sage-mid);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    /* ── VIDEO ── */
+    .video-wrap {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #000;
+      margin-bottom: 16px;
+    }
+
+    .video-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+    }
+
+    /* ── REFLECTION BOX ── */
+    .reflection {
+      background: var(--mint-surface);
+      border-left: 3px solid var(--mint);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--sage-dark);
+      line-height: 1.7;
+    }
+
+    .reflection strong { color: var(--mint); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-mint {
+      background: var(--mint);
+      color: white;
+    }
+
+    .btn-mint:hover { background: var(--sage-dark); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--mint);
+      border: 1.5px solid var(--mint);
+    }
+
+    .btn-outline:hover {
+      background: var(--mint-surface);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* ── TAGS ── */
+    .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+
+    .tag {
+      background: var(--mint-surface);
+      color: var(--mint);
+      border: 1px solid var(--mint-border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .tag.orange { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+    .tag.purple { background: #ede8fc; color: #6b52b8; border-color: #c5b8f0; }
+    .tag.blue   { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
+    .tag.red    { background: #ffebee; color: #c62828; border-color: #ef9a9a; }
+
+    /* ── SKILLS GRID ── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .skill-item {
+      background: var(--white);
+      border: 1px solid var(--mint-border);
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--sage-dark);
+    }
+
+    .skill-item span { display: block; font-size: 1.4rem; margin-bottom: 6px; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 28px; }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 8px; top: 8px; bottom: 8px;
+      width: 2px;
+      background: var(--mint-border);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 6px;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--mint);
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px var(--mint);
+    }
+
+    .tl-item h4 { font-size: 0.9rem; font-weight: 700; color: var(--sage-dark); }
+    .tl-item p  { font-size: 0.83rem; color: var(--sage-mid); margin-top: 4px; }
+
+    /* ── RESOURCES ── */
+    .resource-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--mint-border);
+    }
+
+    .resource-item:last-child { border-bottom: none; }
+
+    .resource-icon {
+      font-size: 1.3rem;
+      width: 36px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .resource-item h4 { font-size: 0.88rem; font-weight: 600; color: var(--sage-dark); }
+    .resource-item p  { font-size: 0.8rem; color: var(--sage-muted); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--sage-dark);
+      color: rgba(255,255,255,0.8);
+      text-align: center;
+      padding: 32px 24px;
+      font-size: 0.85rem;
+    }
+
+    footer strong { color: white; }
+
+    /* ── PROFILE INFO TABLE ── */
+    .info-table { width: 100%; border-collapse: collapse; }
+    .info-table td {
+      padding: 10px 12px;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--mint-border);
+    }
+    .info-table td:first-child {
+      font-weight: 600;
+      color: var(--sage-muted);
+      width: 140px;
+      white-space: nowrap;
+    }
+    .info-table td:last-child { color: var(--sage-dark); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      #home h1 { font-size: 1.5rem; }
+      .nav-links { display: none; }
+      section { padding: 40px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════ NAV -->
+<nav>
+  <a class="nav-brand" href="#home">🌿 MoodSpace</a>
+  <ul class="nav-links">
+    <li><a href="#home">Home</a></li>
+    <li><a href="#labs">Labs</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#reflection">Reflection</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#resources">Resources</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════════════ HERO -->
+<section id="home" style="max-width:100%; padding:80px 24px;">
+  <div class="hero-emoji">🌿</div>
+  <h1>Nur Adlyna Batrisyia Binti Rosmadi</h1>
+  <p class="subtitle">Bachelor of Information Technology &nbsp;|&nbsp; Universiti Kebangsaan Malaysia</p>
+
+  <div class="badge-row">
+    <span class="badge">📱 Matric: A216765</span>
+    <span class="badge">👩‍🏫 Instructor: Cikgu Izwan</span>
+    <span class="badge">📅 2025–2026</span>
+    <span class="badge">🎓 FTSM, UKM</span>
+  </div>
+
+  <p style="max-width:600px; margin:0 auto 24px; opacity:0.9; font-size:0.95rem;">
+    I am a first-year IT student passionate about mobile development. Through this course,
+    I built MoodSpace, a mental health tracking app from a static layout all the way to a
+    fully connected app with Room, Firebase, REST API, and sensor integration.
+  </p>
+
+  <div class="sdg-card">
+    <strong>🎯 SDG 3 - Good Health and Well-Being</strong>
+    <p>Promoting mental health awareness through accessible daily check-in tools for everyone.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ LABS -->
+<section id="labs">
+  <h2 class="section-title">📚 Lab Submissions</h2>
+  <div class="section-line"></div>
+
+  <!-- LAB 1 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🎨</div>
+      <div>
+        <div class="card-title">Lab 1 - Static UI with Jetpack Compose</div>
+        <div class="card-sub">Compose layouts · Column · Row · Box · Text · Image</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Jetpack Compose</span>
+      <span class="tag">Column</span>
+      <span class="tag">Row</span>
+      <span class="tag">Box</span>
+      <span class="tag">Static UI</span>
+    </div>
+    <p>Built the first version of MoodSpace's home screen as a static UI using Jetpack Compose.
+       I learned how to structure layouts using Column, Row, and Box, the three core layout
+       composables. The screen included a top bar, daily goals section, and a bottom navigation bar,
+       all styled to mirror the MoodFit reference app with a mint-green and sage colour palette.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=vcjJbVVIqio" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Lab 1 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="reflection">
+      <strong>Reflection:</strong> Lab 1 was my first time using Jetpack Compose and I found the
+      declarative approach very different from XML layouts. The biggest challenge was understanding
+      how Modifier chaining works, every layout decision flows through modifiers rather than
+      separate attributes. By the end I could confidently build structured UIs and understood why
+      Column, Row, and Box each serve a different layout purpose.
+    </div>
+  </div>
+
+  <!-- LAB 2 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">⚡</div>
+      <div>
+        <div class="card-title">Lab 2 - Interactivity & State Management</div>
+        <div class="card-sub">TextField · Button · remember · mutableStateOf · Dialog</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">State</span>
+      <span class="tag">TextField</span>
+      <span class="tag">remember</span>
+      <span class="tag">Dialog</span>
+      <span class="tag">Interactivity</span>
+    </div>
+    <p>Added interactivity to MoodSpace by introducing state management with
+       <code>remember</code> and <code>mutableStateOf</code>. Users could now enter their name,
+       save it, and see the greeting update dynamically. I also added a Mood Dialog popup where
+       users select their mood from 5 emoji options — Great, Good, OK, Poor, and Bad, and a
+       Gratitude page with text input fields.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=GUcWO9FmeYQ" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Lab 2 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="reflection">
+      <strong>Reflection:</strong> This lab taught me the fundamental difference between stateless
+      and stateful composables. I also learned the two-variable pattern, using one variable for
+      live input and another for the saved display value, which prevents the UI from updating
+      until the user confirms. The Mood Dialog was the most satisfying feature to build because
+      it felt like a real app interaction.
+    </div>
+  </div>
+
+  <!-- LAB 3 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🎨</div>
+      <div>
+        <div class="card-title">Lab 3 - Material Design & Theming</div>
+        <div class="card-sub">MaterialTheme · Color.kt · Theme.kt · animateContentSize</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Material Design</span>
+      <span class="tag">Color Scheme</span>
+      <span class="tag">Typography</span>
+      <span class="tag">Animation</span>
+      <span class="tag">Card</span>
+    </div>
+    <p>Applied Material Design 3 to MoodSpace by creating a custom <code>Color.kt</code> and
+       <code>Theme.kt</code> with a mint-green primary palette and sage secondary colours.
+       I wrapped all screens in <code>MoodSpaceTheme</code> and replaced plain containers
+       with <code>Card</code> composables. I also added a spring-based <code>animateContentSize</code>
+       animation to the Reminders card so it expands and collapses smoothly when tapped.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=FI1ktckTrfQ" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Lab 3 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+  
+    <div class="reflection">
+      <strong>Reflection:</strong> Lab 3 showed me how much a consistent colour system improves
+      the overall feel of an app. Defining colours once in Color.kt and referencing them everywhere
+      made the UI much easier to maintain. The animateContentSize spring animation also taught me
+      that great UX comes from small details, a single line of code made the reminder card feel
+      polished and responsive.
+    </div>
+  </div>
+
+  <!-- LAB 4 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🗺️</div>
+      <div>
+        <div class="card-title">Lab 4 - Navigation & ViewModel</div>
+        <div class="card-sub">NavHost · NavController · sealed class · StateFlow · ViewModel</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Navigation Compose</span>
+      <span class="tag">ViewModel</span>
+      <span class="tag">StateFlow</span>
+      <span class="tag">Multi-Screen</span>
+      <span class="tag">sealed class</span>
+    </div>
+    <p>Upgraded MoodSpace to a true multi-screen app using Jetpack Compose Navigation and ViewModel.
+       I defined all routes in a sealed class called <code>Screen</code> and set up a
+       <code>NavHost</code> with composable destinations for Home, Inbox, Inbox Detail, History,
+       Insights, Sleep, and Gratitude. The <code>MoodSpaceViewModel</code> holds all shared state
+       in a <code>MoodSpaceUiState</code> data class exposed via <code>StateFlow</code>, ensuring
+       data persists across screen transitions.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=rYdHDJQycTE" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Lab 4 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="reflection">
+      <strong>Reflection:</strong> Lab 4 was the most complex lab so far and also the most
+      rewarding. Understanding how ViewModel survives navigation while local state does not was
+      a key insight. I also learned about dynamic route arguments — passing the message index
+      through the route string to open specific inbox messages. This lab transformed MoodSpace
+      from a single screen into a real application architecture.
+    </div>
+  </div>
+
+  <!-- LAB 5 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🗄️</div>
+      <div>
+        <div class="card-title">Lab 5 - Room Database Integration</div>
+        <div class="card-sub">Entity · DAO · RoomDatabase · Repository · StateFlow · MVVM</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">Room</span>
+      <span class="tag">Entity</span>
+      <span class="tag">DAO</span>
+      <span class="tag">Repository</span>
+      <span class="tag">MVVM</span>
+      <span class="tag">Persistent Storage</span>
+    </div>
+    <p>Integrated Room Database into MoodSpace to make data persist after the app is closed.
+       I created an <code>ActivityEntity</code> data class with @Entity annotation, an
+       <code>ActivityDao</code> interface with insert, getAll, and delete operations returning
+       <code>Flow&lt;List&gt;</code>, an <code>AppDatabase</code> singleton class, and an
+       <code>ActivityRepository</code> connecting the ViewModel to the DAO. All mood, gratitude,
+       sleep, and simple activity entries are now stored in a local SQLite database and verified
+       through Android Studio's Database Inspector.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=-SGhn7rUuSk" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Lab 5 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="reflection">
+      <strong>Reflection:</strong> Lab 5 completed the full MVVM + Repository + Room architecture
+      pattern. The most important lesson was understanding why the Repository layer exists, it
+      decouples the ViewModel from the data source, making the code testable and maintainable.
+      Seeing data survive an app restart for the first time was genuinely exciting and made the
+      purpose of persistent storage very clear.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ PROJECTS -->
+<section id="projects">
+  <h2 class="section-title">🚀 Project Submissions</h2>
+  <div class="section-line"></div>
+
+  <!-- PROJECT 1 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📱</div>
+      <div>
+        <div class="card-title">Project 1 - MoodSpace (Lab 4 + Full Features)</div>
+        <div class="card-sub">SDG 3 · Multi-screen · ViewModel · Navigation Compose</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">SDG 3</span>
+      <span class="tag">Navigation</span>
+      <span class="tag">ViewModel</span>
+      <span class="tag">StateFlow</span>
+      <span class="tag blue">7 Screens</span>
+    </div>
+
+    <p><strong>Problem Statement:</strong> Many young adults lack simple, accessible tools to
+       monitor their mental well-being consistently. MoodSpace provides a structured daily
+       check-in system for mood, gratitude, sleep, and personal activities,  helping users
+       build healthy mental health habits aligned with SDG 3.</p>
+
+    <p>Key features include: daily mood logging with 5 emoji options, a gratitude journal
+       with 10 selectable prompts, sleep tracker with automatic duration calculation, simple
+       activity logging, an inbox with 3 mental health messages, a history screen showing all
+       entries, and a mental health assessment popup after completing all 3 daily goals that
+       classifies the user's state and saves results to history.</p>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="    https://www.youtube.com/watch?v=OOnhLNYUy40" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Project 1 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-mint"
+         href="https://github.com/AdlynaBatrisyia/A216765_NurAdlynaBatrisyia_CikguIzwan_Project2" target="_blank">
+        📂 View on GitHub
+      </a>
+    </div>
+
+    <div class="reflection" style="margin-top:16px;">
+      <strong>Lessons Learned:</strong> Project 1 taught me how to tie together everything from
+      Labs 1–4 into a complete, functional app. The biggest challenge was managing shared state
+      across 7+ screens without data inconsistencies. I learned that a well-designed ViewModel
+      with a single source of truth makes navigation seamless. I also learned the importance of
+      the user flow,  every screen should connect logically to the next.
+    </div>
+  </div>
+
+  <!-- PROJECT 2 -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🌐</div>
+      <div>
+        <div class="card-title">Project 2 - MoodSpace Advanced (API + Sensor + Firebase + Room)</div>
+        <div class="card-sub">SDG 3 · Firebase Firestore · Retrofit API · Accelerometer · Room</div>
+      </div>
+    </div>
+    <div class="tag-row">
+      <span class="tag">SDG 3</span>
+      <span class="tag orange">Firebase</span>
+      <span class="tag purple">Retrofit API</span>
+      <span class="tag blue">Accelerometer</span>
+      <span class="tag">Room</span>
+      <span class="tag red">8 Screens</span>
+    </div>
+
+    <p><strong>Problem Statement:</strong> Project 1 demonstrated daily mental health tracking,
+       but data was lost on app close and the app had no connection to the outside world.
+       Project 2 upgrades MoodSpace with persistent Room storage, Firebase Firestore cloud sync,
+       live motivational quotes from the Quotable REST API, and an accelerometer-based
+       breathing exercise feature triggered by shaking the device.</p>
+
+    <p><strong>Four Technical Pillars:</strong></p>
+    <ul style="margin:8px 0 12px 20px; font-size:0.88rem; color:var(--sage-mid); line-height:1.8;">
+      <li><strong>Room Database</strong> — All mood, gratitude, sleep, activity, and mental health entries persist locally after app closes.</li>
+      <li><strong>Firebase Firestore</strong> — Mental health check-in results are synced to the cloud after completing all daily goals.</li>
+      <li><strong>Quotable REST API (Retrofit)</strong> — Daily motivational quotes are fetched live from api.quotable.io and displayed on a dedicated Quote screen.</li>
+      <li><strong>Accelerometer Sensor</strong> — Shaking the device triggers a breathing exercise popup using the SensorEventListener to detect acceleration changes.</li>
+    </ul>
+    <div class="video-wrap" style="position: relative; background-color: #000000;">
+      <a href="https://www.youtube.com/watch?v=8OhGs3nZuXY" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 10;">
+        <img src="ytpic.png" alt="Watch Project 2 VSR on YouTube" loading="lazy" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </a>
+    </div>
+    <div class="btn-row">
+      <a class="btn btn-mint"
+         href="https://github.com/AdlynaBatrisyia/A216765_NurAdlynaBatrisyia_CikguIzwan_Project2" target="_blank">
+        📂 View on GitHub
+      </a>
+    </div>
+
+    <div class="reflection" style="margin-top:16px;">
+      <strong>Lessons Learned:</strong> Project 2 was the most technically challenging work I have
+      done in this course. Integrating four different systems,  Room, Firebase, Retrofit, and the
+      Accelerometer, each with their own threading and lifecycle requirements, taught me the
+      importance of coroutines and viewModelScope for managing asynchronous operations cleanly.
+      Firebase Firestore's real-time nature and Retrofit's suspend functions both rely on
+      coroutines, which reinforced how central asynchronous programming is to modern Android
+      development. I also learned that hardware sensors require careful lifecycle management, 
+      registering in onResume and unregistering in onPause to avoid battery drain.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ REFLECTION -->
+<section id="reflection">
+  <h2 class="section-title">💭 Reflection & Learning Journey</h2>
+  <div class="section-line"></div>
+
+  <div class="card">
+    <p>
+      When I started Lab 1, I had never used Jetpack Compose and struggled to understand why
+      layouts were written in Kotlin rather than XML. By Project 2, I was building multi-screen
+      apps with database persistence, cloud integration, REST APIs, and hardware sensors, all
+      within a single semester. The growth has been significant and sometimes overwhelming, but
+      every lab built directly on the previous one in a way that made the progression feel natural.
+    </p>
+
+    <p>
+      The most important concept I learned throughout this course is the MVVM architecture, 
+      Model, View, ViewModel. Separating the UI from the business logic, and the business logic
+      from the data source, made my code progressively cleaner and easier to debug. Lab 5's
+      Repository pattern was the final piece that completed this architecture, and seeing it all
+      work together in Project 2 was genuinely satisfying.
+    </p>
+
+    <p>
+      My chosen SDG : SDG 3, Good Health and Well-Being, motivated every design decision.
+      Mental health is a topic that matters to me, and building an app that could genuinely
+      help someone track their emotional well-being made the technical challenges feel worthwhile.
+      From a simple static layout in Lab 1 to a fully connected, sensor-aware app in Project 2,
+      MoodSpace has become something I am proud to have built from scratch.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3 style="color:var(--sage-dark); margin-bottom:20px; font-size:1rem;">
+      📈 My Growth — Lab 1 to Project 2
+    </h3>
+    <div class="timeline">
+      <div class="tl-item">
+        <h4>Lab 1 — Static UI</h4>
+        <p>Built first Compose layout. Learned Column, Row, Box, and Modifier chaining.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Lab 2 — Interactivity</h4>
+        <p>Added state with remember and mutableStateOf. Built mood dialog and name input.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Lab 3 — Material Design</h4>
+        <p>Applied custom theme, colour scheme, typography, and spring animations.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Lab 4 — Navigation & ViewModel</h4>
+        <p>Built 7-screen app with NavHost, sealed class routes, and StateFlow shared state.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Lab 5 — Room Database</h4>
+        <p>Implemented full MVVM + Repository + Room architecture. Data now persists on device.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Project 1 — Complete App</h4>
+        <p>Tied all labs together with mental health assessment, inbox, history, and activity tracking.</p>
+      </div>
+      <div class="tl-item">
+        <h4>Project 2 — Advanced Integration</h4>
+        <p>Added Firebase Firestore, Retrofit API, Accelerometer sensor, and 8-screen navigation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ SKILLS -->
+<section id="skills">
+  <h2 class="section-title">🛠️ Skills & Tech Stack</h2>
+  <div class="section-line"></div>
+
+  <div class="skills-grid">
+    <div class="skill-item"><span>🎨</span>Jetpack Compose</div>
+    <div class="skill-item"><span>🗺️</span>Navigation Compose</div>
+    <div class="skill-item"><span>🧠</span>ViewModel</div>
+    <div class="skill-item"><span>💧</span>StateFlow</div>
+    <div class="skill-item"><span>🗄️</span>Room Database</div>
+    <div class="skill-item"><span>☁️</span>Firebase Firestore</div>
+    <div class="skill-item"><span>🌐</span>Retrofit</div>
+    <div class="skill-item"><span>📡</span>REST API</div>
+    <div class="skill-item"><span>📳</span>Accelerometer</div>
+    <div class="skill-item"><span>🔁</span>Coroutines</div>
+    <div class="skill-item"><span>🏗️</span>MVVM</div>
+    <div class="skill-item"><span>🎯</span>Material Design 3</div>
+    <div class="skill-item"><span>🔷</span>Kotlin</div>
+    <div class="skill-item"><span>🐙</span>Git & GitHub</div>
+    <div class="skill-item"><span>📱</span>Android Studio</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ RESOURCES -->
+<section id="resources">
+  <h2 class="section-title">📖 Resources & References</h2>
+  <div class="section-line"></div>
+
+  <div class="card">
+    <div class="resource-item">
+      <div class="resource-icon">🤖</div>
+      <div>
+        <h4>Google Android Developers Documentation</h4>
+        <p>Official Jetpack Compose, Navigation, Room, and ViewModel documentation at developer.android.com</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">🌐</div>
+      <div>
+        <h4>Quotable API</h4>
+        <p>Free public REST API for motivational and inspirational quotes, api.quotable.io. No API key required.</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">☁️</div>
+      <div>
+        <h4>Firebase Firestore</h4>
+        <p>Google's cloud NoSQL database used for storing and syncing mental health check-in results - firebase.google.com</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">🔗</div>
+      <div>
+        <h4>Retrofit by Square</h4>
+        <p>Type-safe HTTP client for Android used to fetch quotes from the Quotable API - square.github.io/retrofit</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">📳</div>
+      <div>
+        <h4>Android Sensor Framework</h4>
+        <p>Android SensorManager and SensorEventListener APIs used to implement shake detection via the Accelerometer sensor.</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">✨</div>
+      <div>
+        <h4>AI Assistance — Claude (Anthropic)</h4>
+        <p>AI tools were used to assist with debugging compile errors, understanding architectural patterns, and
+           generating boilerplate code during development. All code was reviewed, understood, and modified
+           independently to ensure full comprehension for live Q&A sessions.</p>
+      </div>
+    </div>
+    <div class="resource-item">
+      <div class="resource-icon">📚</div>
+      <div>
+        <h4>Android Basics with Compose — Google Codelab</h4>
+        <p>Pathway codelabs at developer.android.com covering Navigation (Unit 4), Room (Unit 6), and Architecture patterns.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════ FOOTER -->
+<footer>
+  <p>🌿 <strong>MoodSpace e-Portfolio</strong></p>
+  <p style="margin-top:6px;">
+    Nur Adlyna Batrisyia Binti Rosmadi &nbsp;·&nbsp; A216765 &nbsp;·&nbsp;
+    Bachelor of Information Technology, UKM &nbsp;·&nbsp; 2026
+  </p>
+  <p style="margin-top:6px; opacity:0.6; font-size:0.78rem;">
+    TK2323 / TM2213 Mobile Programming &nbsp;·&nbsp; Instructor: Cikgu Izwan
+  </p>
+</footer>
+
+</body>
+</html>
